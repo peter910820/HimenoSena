@@ -7,6 +7,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+
+	"HimenoSena/internal/commands"
 )
 
 type Config struct {
@@ -39,6 +41,7 @@ func main() {
 	}
 
 	c.Bot.AddHandler(ready)
+	c.Bot.AddHandler(onInteraction)
 
 	err = c.Bot.Open()
 	if err != nil {
@@ -56,4 +59,18 @@ func main() {
 
 func ready(s *discordgo.Session, m *discordgo.Ready) {
 	s.UpdateGameStatus(0, "想要傳達給你的愛戀")
+	commands.BasicCommand(s)
+}
+
+func onInteraction(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	switch i.ApplicationCommandData().Name {
+	case "ping":
+		delay := s.HeartbeatLatency()
+		go commands.Ping(s, i, delay)
+	case "send":
+		amount := i.ApplicationCommandData().Options[0].StringValue()
+		go commands.Send(s, i, amount)
+	default:
+		logrus.Warn("command not founds")
+	}
 }
