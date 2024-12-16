@@ -16,6 +16,13 @@ type Config struct {
 }
 
 func main() {
+	// logrus settings
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors:   true,
+		FullTimestamp: true,
+	})
+	logrus.SetLevel(logrus.DebugLevel)
+	// load .env
 	err := godotenv.Load(".env")
 	if err != nil {
 		logrus.Fatal(err)
@@ -31,20 +38,22 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	// bot.AddHandler(ready)
-	// bot.AddHandler(guildMemberAdd)
-	// bot.AddHandler(onInteraction)
+	c.Bot.AddHandler(ready)
 
 	err = c.Bot.Open()
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	logrus.Println("bot is now running. Press CTRL+C to exit.")
+	logrus.Info("bot is now running. Press CTRL+C to exit.")
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
 	interruptSignal := <-ch
 	c.Bot.Close()
-	logrus.Println(interruptSignal)
+	logrus.Info(interruptSignal)
+}
+
+func ready(s *discordgo.Session, m *discordgo.Ready) {
+	s.UpdateGameStatus(0, "想要傳達給你的愛戀")
 }
