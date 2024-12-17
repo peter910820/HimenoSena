@@ -10,13 +10,8 @@ import (
 
 	"HimenoSena/internal/commands"
 	"HimenoSena/internal/event"
+	"HimenoSena/internal/models"
 )
-
-type Config struct {
-	Bot   *discordgo.Session
-	Token string
-	AppId string
-}
 
 func main() {
 	// logrus settings
@@ -31,9 +26,10 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	c := Config{
-		Token: os.Getenv("TOKEN"),
-		AppId: os.Getenv("Application_ID"),
+	c := models.Config{
+		Token:         os.Getenv("TOKEN"),
+		AppId:         os.Getenv("Application_ID"),
+		VoiceManageId: os.Getenv("VOICE_MANAGE_ID"),
 	}
 
 	c.Bot, err = discordgo.New("Bot " + c.Token)
@@ -43,7 +39,9 @@ func main() {
 
 	c.Bot.AddHandler(ready)
 	c.Bot.AddHandler(onInteraction)
-	c.Bot.AddHandler(event.VoiceHandler)
+	c.Bot.AddHandler(func(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
+		event.VoiceHandler(s, v, &c)
+	})
 
 	err = c.Bot.Open()
 	if err != nil {
