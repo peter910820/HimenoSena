@@ -28,8 +28,10 @@ func main() {
 
 	c := models.Config{
 		Token:         os.Getenv("TOKEN"),
-		AppId:         os.Getenv("Application_ID"),
-		VoiceManageId: os.Getenv("VOICE_MANAGE_ID"),
+		AppID:         os.Getenv("APP_ID"),
+		MainGuildID:   os.Getenv("MAIN_GUILD_ID"),
+		BotChannelID:  os.Getenv("BOT_CHANNEL_ID"),
+		VoiceManageID: os.Getenv("VOICE_MANAGE_ID"),
 	}
 
 	c.Bot, err = discordgo.New("Bot " + c.Token)
@@ -39,6 +41,9 @@ func main() {
 
 	c.Bot.AddHandler(ready)
 	c.Bot.AddHandler(onInteraction)
+	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
+		event.MessageHandler(s, m, &c)
+	})
 	c.Bot.AddHandler(func(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
 		event.VoiceHandler(s, v, &c)
 	})

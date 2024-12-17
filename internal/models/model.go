@@ -7,6 +7,8 @@ import (
 type Config struct {
 	Bot           *discordgo.Session
 	Token         string
-	AppId         string
-	VoiceManageId string
+	AppID         string
+	MainGuildID   string
+	BotChannelID  string
+	VoiceManageID string
 }
