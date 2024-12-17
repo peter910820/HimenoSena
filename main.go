@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"HimenoSena/internal/commands"
+	"HimenoSena/internal/event"
 )
 
 type Config struct {
@@ -42,6 +43,7 @@ func main() {
 
 	c.Bot.AddHandler(ready)
 	c.Bot.AddHandler(onInteraction)
+	c.Bot.AddHandler(event.VoiceHandler)
 
 	err = c.Bot.Open()
 	if err != nil {
