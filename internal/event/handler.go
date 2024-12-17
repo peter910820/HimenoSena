@@ -7,15 +7,27 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"HimenoSena/internal/models"
+	"HimenoSena/internal/utils"
 )
 
 func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *models.Config) {
-	if v.BeforeUpdate == nil {
-
+	// for member := range *vs{
+	// 	*vs = append(*vs, *v)
+	// }
+	name, err := utils.GetName(s, v)
+	if err != nil {
+		logrus.Error(err)
 	}
-	logrus.Debugf("%s", v.Member.User.Username)
-
-	// s.ChannelMessageSend()
+	// a member into a voice channel
+	if v.BeforeUpdate == nil {
+		s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***加入了***%s***頻道!", name.Username, name.ChannelName))
+	} else {
+		if v.ChannelID == "" {
+			s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***退出了頻道!", name.Username))
+		} else {
+			// TODO: add other(Deaf, Mute) status hint
+		}
+	}
 }
 
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.Config) {
