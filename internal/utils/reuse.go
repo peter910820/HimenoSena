@@ -4,25 +4,24 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type Name struct {
-	Username    string
-	ChannelName string
-}
-
-func GetName(s *discordgo.Session, v *discordgo.VoiceStateUpdate) (*Name, error) {
-	name := Name{}
-
+func GetUserName(s *discordgo.Session, v *discordgo.VoiceStateUpdate) (*string, error) {
+	name := ""
 	su, err := s.User(v.UserID)
 	if err != nil {
 		return &name, err
 	}
-	name.Username = su.Username
+	name = su.Username
 
+	return &name, nil
+}
+
+func GetChannelName(s *discordgo.Session, v *discordgo.VoiceStateUpdate) (*string, error) {
+	name := ""
 	sc, err := s.Channel(v.ChannelID)
 	if err != nil {
 		return &name, err
 	}
-	name.ChannelName = sc.Name
+	name = sc.Name
 
 	return &name, nil
 }

@@ -11,21 +11,51 @@ import (
 )
 
 func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *models.Config) {
-	// for member := range *vs{
-	// 	*vs = append(*vs, *v)
-	// }
-	name, err := utils.GetName(s, v)
+	username, err := utils.GetUserName(s, v)
 	if err != nil {
 		logrus.Error(err)
 	}
 	// a member into a voice channel
 	if v.BeforeUpdate == nil {
-		s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***加入了***%s***頻道!", name.Username, name.ChannelName))
+		channelName, err := utils.GetChannelName(s, v)
+		if err != nil {
+			logrus.Error(err)
+		}
+		s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***加入了***%s***頻道!", *username, *channelName))
 	} else {
 		if v.ChannelID == "" {
-			s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***退出了頻道!", name.Username))
+			s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***退出了頻道!", *username))
 		} else {
-			// TODO: add other(Deaf, Mute) status hint
+			if v.BeforeUpdate.ChannelID != v.ChannelID {
+				channelName, err := utils.GetChannelName(s, v)
+				if err != nil {
+					logrus.Error(err)
+				}
+				s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***跑到***%s***頻道了!", *username, *channelName))
+			} else if v.BeforeUpdate.SelfDeaf != v.SelfDeaf {
+				s.ChannelMessageSend(c.VoiceManageID, func() string {
+					if v.SelfDeaf {
+						return fmt.Sprintf("***%s***拒聽中!", *username)
+					}
+					return fmt.Sprintf("***%s***解除拒聽!", *username)
+				}())
+			} else if v.BeforeUpdate.SelfMute != v.SelfMute {
+				s.ChannelMessageSend(c.VoiceManageID, func() string {
+					if v.SelfMute {
+						return fmt.Sprintf("***%s***靜音中!", *username)
+					}
+					return fmt.Sprintf("***%s***解除靜音!", *username)
+				}())
+			} else if v.BeforeUpdate.SelfStream != v.SelfStream {
+				s.ChannelMessageSend(c.VoiceManageID, func() string {
+					if v.SelfStream {
+						return fmt.Sprintf("***%s***開始直播!", *username)
+					}
+					return fmt.Sprintf("***%s***關掉直播了QQ!", *username)
+				}())
+			} else {
+				s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***語音狀態改變!", *username))
+			}
 		}
 	}
 }
