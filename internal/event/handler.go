@@ -83,6 +83,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 				logrus.Error(err)
 			}
 
+		} else if m.Author.Bot && (m.ChannelID != c.BotChannelID) && len(m.Embeds) == 0 {
+			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+			if err != nil {
+				logrus.Error(err)
+			}
+			_, err = s.ChannelMessageSend(c.BotChannelID, fmt.Sprintf("轉送***%s***的訊息:\n%s", m.Author.Username, m.Content))
+			if err != nil {
+				logrus.Error(err)
+			}
 		}
 	}
 
