@@ -1,2 +1,2 @@
 # HimenoSena
-Discord bot made with golang
+A disocrd bot is used to intercept messages from other bots to designated channels
