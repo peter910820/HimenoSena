@@ -31,7 +31,9 @@ func main() {
 		AppID:         os.Getenv("APP_ID"),
 		MainGuildID:   os.Getenv("MAIN_GUILD_ID"),
 		BotChannelID:  os.Getenv("BOT_CHANNEL_ID"),
+		BotChannelID2: os.Getenv("BOT_CHANNEL_ID2"),
 		VoiceManageID: os.Getenv("VOICE_MANAGE_ID"),
+		DevCategoryID: os.Getenv("DEV_CATEGORY_ID"),
 	}
 
 	c.Bot, err = discordgo.New("Bot " + c.Token)

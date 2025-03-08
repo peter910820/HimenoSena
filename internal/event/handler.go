@@ -65,10 +65,19 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+	// judge DevCategoryID id
+	if channel.ParentID == c.DevCategoryID {
+		return
+	}
 	// judge guild id
 	if m.GuildID == c.MainGuildID {
 		// judge if message is for bot and ChannelID not command channel
-		if m.Author.Bot && (m.ChannelID != c.BotChannelID) && len(m.Embeds) > 0 {
+		if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) > 0 {
 			// transferMsg := fmt.Sprintf("轉送*%s*的訊息:\n%v", m.Author.Username, m.Content)
 			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
 			if err != nil {
@@ -83,7 +92,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 				logrus.Error(err)
 			}
 
-		} else if m.Author.Bot && (m.ChannelID != c.BotChannelID) && len(m.Embeds) == 0 {
+		} else if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) == 0 {
 			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
 			if err != nil {
 				logrus.Error(err)

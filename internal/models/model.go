@@ -10,5 +10,7 @@ type Config struct {
 	AppID         string
 	MainGuildID   string
 	BotChannelID  string
+	BotChannelID2 string
 	VoiceManageID string
+	DevCategoryID string
 }
