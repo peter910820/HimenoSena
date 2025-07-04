@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -24,4 +26,16 @@ func GetChannelName(s *discordgo.Session, v *discordgo.VoiceStateUpdate) (*strin
 	name = sc.Name
 
 	return &name, nil
+}
+
+func SendInteractionMsg(s *discordgo.Session, i *discordgo.InteractionCreate, msg string) {
+	if strings.TrimSpace(msg) == "" {
+		msg = "該功能目前異常，請稍後再試"
+	}
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: msg,
+		},
+	})
 }

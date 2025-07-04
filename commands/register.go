@@ -23,6 +23,24 @@ func BasicCommand(s *discordgo.Session) {
 				},
 			},
 		},
+		{
+			Name:        "取得身分組",
+			Description: "取得身分組",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "roles",
+					Description: "choice a role",
+					Required:    true,
+					Choices: []*discordgo.ApplicationCommandOptionChoice{
+						{
+							Name:  "Galgame玩家",
+							Value: "galgame",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, cmd := range commands {
 		_, err := s.ApplicationCommandCreate(s.State.User.ID, "", cmd)

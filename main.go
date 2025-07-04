@@ -77,6 +77,8 @@ func onInteraction(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	case "send":
 		amount := i.ApplicationCommandData().Options[0].StringValue()
 		go commands.Send(s, i, amount)
+	case "取得身分組":
+		go commands.GetRoles(s, i)
 	default:
 		logrus.Warn("command not founds")
 	}
