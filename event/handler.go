@@ -6,8 +6,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
 
-	"HimenoSena/internal/models"
-	"HimenoSena/internal/utils"
+	"HimenoSena/models"
+	"HimenoSena/utils"
 )
 
 func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *models.Config) {

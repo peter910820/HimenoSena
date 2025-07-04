@@ -8,9 +8,9 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 
-	"HimenoSena/internal/commands"
-	"HimenoSena/internal/event"
-	"HimenoSena/internal/models"
+	"HimenoSena/commands"
+	"HimenoSena/event"
+	"HimenoSena/models"
 )
 
 func main() {
