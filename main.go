@@ -80,6 +80,7 @@ func main() {
 	signal.Notify(ch, os.Interrupt)
 	interruptSignal := <-ch
 	c.Bot.Close()
+	utils.SaveMemberData(&serverMemberExp)
 	logrus.Info(interruptSignal)
 }
 

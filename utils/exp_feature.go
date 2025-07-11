@@ -2,6 +2,8 @@ package utils
 
 import (
 	"HimenoSena/models"
+	"encoding/json"
+	"os"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -77,4 +79,20 @@ func ModifyArticle(memberID string, db *gorm.DB) (uint, uint, error) {
 		return 0, 0, err
 	}
 	return levelUpExp, memberData.Level + 1, nil
+}
+
+func SaveMemberData(data *models.ServerMemberExp) {
+	file, err := os.Create(data.ServerID + "_memberData.json")
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+
+	if err := encoder.Encode(data.MemberData); err != nil {
+		logrus.Error(err)
+	}
 }
