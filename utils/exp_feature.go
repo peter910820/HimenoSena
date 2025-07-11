@@ -24,11 +24,11 @@ func SetUserData(c *models.Config, db *gorm.DB) {
 }
 
 func createUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
-	data := models.User{
-		UserID:   member.User.ID,
-		ServerID: c.MainGuildID,
-		UserName: member.User.Username,
-		JoinAt:   member.JoinedAt,
+	data := models.Member{
+		MemberID:   member.User.ID,
+		ServerID:   c.MainGuildID,
+		MemberName: member.User.Username,
+		JoinAt:     member.JoinedAt,
 	}
 
 	err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&data).Error
@@ -37,17 +37,17 @@ func createUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
 	}
 }
 
-func GenerateServerUserExp(c *models.Config, db *gorm.DB, serverUserExp *models.ServerUserExp) {
+func GenerateServerUserExp(c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
 	serverUserExp.ServerID = c.MainGuildID
-	serverUserExp.UserData = make(map[string]uint)
-	users := queryUser(db)
-	for _, user := range *users {
-		serverUserExp.UserData[user.UserID] = user.LevelUpExp
+	serverUserExp.MemberData = make(map[string]uint)
+	members := queryUser(db)
+	for _, member := range *members {
+		serverUserExp.MemberData[member.MemberID] = member.LevelUpExp
 	}
 }
 
-func queryUser(db *gorm.DB) *[]models.User {
-	var UserData []models.User
+func queryUser(db *gorm.DB) *[]models.Member {
+	var UserData []models.Member
 
 	result := db.Find(&UserData)
 	if result.Error != nil {
@@ -57,21 +57,21 @@ func queryUser(db *gorm.DB) *[]models.User {
 }
 
 func ModifyArticle(memberID string, db *gorm.DB) (uint, uint, error) {
-	var memberData models.User
+	var memberData models.Member
 	err := db.Select("level, exp").Where("user_id = ?", memberID).First(&memberData).Error
 	if err != nil {
 		logrus.Error(err)
 	}
 	levelUpExp := 5 + (memberData.Level+1)*2 - 2
 	logrus.Debugf("%+v", memberData)
-	data := models.User{
+	data := models.Member{
 		Level:      memberData.Level + 1,
 		Exp:        memberData.Exp + 5 + (memberData.Level)*2 - 2,
 		LevelUpExp: levelUpExp,
 		UpdatedAt:  time.Now(),
 	}
 
-	err = db.Model(&models.User{}).Where("user_id = ?", memberID).
+	err = db.Model(&models.Member{}).Where("user_id = ?", memberID).
 		Select("level", "exp", "level_up_exp", "updated_at").Updates(data).Error
 	if err != nil {
 		return 0, 0, err

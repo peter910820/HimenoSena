@@ -17,9 +17,9 @@ import (
 
 var (
 	// management database connect
-	dbs           = make(map[string]*gorm.DB)
-	err           error
-	serverUserExp models.ServerUserExp = models.ServerUserExp{}
+	dbs             = make(map[string]*gorm.DB)
+	err             error
+	serverMemberExp models.ServerMemberExp = models.ServerMemberExp{}
 )
 
 func init() {
@@ -60,7 +60,7 @@ func main() {
 	c.Bot.AddHandler(ready)
 	c.Bot.AddHandler(onInteraction)
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		event.MessageHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverUserExp)
+		event.MessageHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
 	})
 	c.Bot.AddHandler(func(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
 		event.VoiceHandler(s, v, &c)
@@ -72,7 +72,7 @@ func main() {
 	}
 
 	utils.SetUserData(&c, dbs[os.Getenv("DATABASE_NAME")])
-	utils.GenerateServerUserExp(&c, dbs[os.Getenv("DATABASE_NAME")], &serverUserExp)
+	utils.GenerateServerUserExp(&c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
 
 	logrus.Info("bot is now running. Press CTRL+C to exit.")
 

@@ -18,17 +18,17 @@ type Config struct {
 	DevCategoryID string
 }
 
-type ServerUserExp struct {
-	ServerID string
-	UserData map[string]uint // key is userID, value is exp required to upgrade
-	Mu       sync.Mutex
+type ServerMemberExp struct {
+	ServerID   string
+	MemberData map[string]uint // key is userID, value is exp required to upgrade
+	Mu         sync.Mutex
 }
 
 // database schema
-type User struct {
-	UserID     string    `gorm:"primaryKey"`
+type Member struct {
+	MemberID   string    `gorm:"primaryKey"`
 	ServerID   string    `gorm:"primaryKey"`
-	UserName   string    `gorm:"not null"`
+	MemberName string    `gorm:"not null"`
 	Level      uint      `gorm:"not null;default:1"`
 	Exp        uint      `gorm:"not null;default:0"` // 該等級的經驗值，加上LevelUpExp才是該成員的所有經驗值
 	LevelUpExp uint      `gorm:"not null;default:5"`

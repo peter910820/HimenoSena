@@ -61,7 +61,7 @@ func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *models
 	}
 }
 
-func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.Config, db *gorm.DB, serverUserExp *models.ServerUserExp) {
+func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
 	// avoid responding to itself
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -107,7 +107,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 		// handle exp feature
 		serverUserExp.Mu.Lock()
 		defer serverUserExp.Mu.Unlock()
-		val, ok := serverUserExp.UserData[m.Author.ID]
+		val, ok := serverUserExp.MemberData[m.Author.ID]
 		if ok {
 			if val-1 == 0 {
 				levelUpExp, level, err := utils.ModifyArticle(m.Author.ID, db)
@@ -116,16 +116,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 					logrus.Error(err)
 					return
 				}
-				serverUserExp.UserData[m.Author.ID] = levelUpExp
+				serverUserExp.MemberData[m.Author.ID] = levelUpExp
 				_, err = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("**%s** 聊天等級升到 **%d** 等", m.Author.GlobalName, level))
 				if err != nil {
 					logrus.Error(err)
 				}
 				return
 			}
-			serverUserExp.UserData[m.Author.ID] = val - 1
+			serverUserExp.MemberData[m.Author.ID] = val - 1
 		}
-		logrus.Debug(serverUserExp.UserData[m.Author.ID])
+		logrus.Debug(serverUserExp.MemberData[m.Author.ID])
 	}
-
 }
