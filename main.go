@@ -7,13 +7,20 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 
 	"HimenoSena/commands"
 	"HimenoSena/event"
 	"HimenoSena/models"
 )
 
-func main() {
+var (
+	// management database connect
+	dbs = make(map[string]*gorm.DB)
+	err error
+)
+
+func init() {
 	// logrus settings
 	logrus.SetFormatter(&logrus.TextFormatter{
 		ForceColors:   true,
@@ -21,11 +28,17 @@ func main() {
 	})
 	logrus.SetLevel(logrus.DebugLevel)
 	// load .env
-	err := godotenv.Load(".env")
+	err = godotenv.Load(".env")
 	if err != nil {
 		logrus.Fatal(err)
 	}
+	// init database
+	dbName, db := models.InitDsn()
+	dbs[dbName] = db
+	models.Migration(dbName, dbs[dbName])
+}
 
+func main() {
 	c := models.Config{
 		Token:         os.Getenv("TOKEN"),
 		AppID:         os.Getenv("APP_ID"),
