@@ -1,0 +1,81 @@
+package utils
+
+import (
+	"HimenoSena/models"
+	"time"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
+
+// set user data into database
+func SetUserData(c *models.Config, db *gorm.DB) {
+	members, err := c.Bot.GuildMembers(c.MainGuildID, "", 1000)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	for _, member := range members {
+		if !member.User.Bot {
+			createUser(c, member, db)
+		}
+	}
+}
+
+func createUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
+	data := models.User{
+		UserID:   member.User.ID,
+		ServerID: c.MainGuildID,
+		UserName: member.User.Username,
+		JoinAt:   member.JoinedAt,
+	}
+
+	err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&data).Error
+	if err != nil {
+		logrus.Fatal(err)
+	}
+}
+
+func GenerateServerUserExp(c *models.Config, db *gorm.DB, serverUserExp *models.ServerUserExp) {
+	serverUserExp.ServerID = c.MainGuildID
+	serverUserExp.UserData = make(map[string]uint)
+	users := queryUser(db)
+	for _, user := range *users {
+		// serverUserExp.UserData[user.UserID] = (user.Level * 10) + (user.Level*2 - 2) - user.Exp
+		serverUserExp.UserData[user.UserID] = user.LevelUpExp
+	}
+}
+
+func queryUser(db *gorm.DB) *[]models.User {
+	var UserData []models.User
+
+	result := db.Find(&UserData)
+	if result.Error != nil {
+		logrus.Error(result.Error)
+	}
+	return &UserData
+}
+
+func ModifyArticle(memberID string, db *gorm.DB) (uint, uint, error) {
+	var memberData models.User
+	err := db.Select("level, exp").Where("user_id = ?", memberID).First(&memberData).Error
+	if err != nil {
+		logrus.Error(err)
+	}
+	levelUpExp := 10 + (memberData.Level+1)*2 - 2
+	logrus.Debugf("%+v", memberData)
+	data := models.User{
+		Level:      memberData.Level + 1,
+		Exp:        memberData.Exp + 10 + (memberData.Level)*2 - 2,
+		LevelUpExp: levelUpExp,
+		UpdatedAt:  time.Now(),
+	}
+
+	err = db.Model(&models.User{}).Where("user_id = ?", memberID).
+		Select("level", "exp", "level_up_exp", "updated_at").Updates(data).Error
+	if err != nil {
+		return 0, 0, err
+	}
+	return levelUpExp, memberData.Level + 1, nil
+}

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/sirupsen/logrus"
 )
 
 func GetUserName(s *discordgo.Session, v *discordgo.VoiceStateUpdate) (*string, error) {
@@ -38,4 +39,19 @@ func SendInteractionMsg(s *discordgo.Session, i *discordgo.InteractionCreate, ms
 			Content: msg,
 		},
 	})
+}
+
+func GetGuildNick(s *discordgo.Session, guildID string, userID string) (string, error) {
+	member, err := s.GuildMember(guildID, userID)
+	if err != nil {
+		// 失敗處理
+		logrus.Error(err)
+		return "", err
+	}
+
+	nick := member.Nick
+	if nick == "" {
+		nick = member.User.Username
+	}
+	return nick, nil
 }

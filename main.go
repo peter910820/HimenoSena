@@ -12,12 +12,14 @@ import (
 	"HimenoSena/commands"
 	"HimenoSena/event"
 	"HimenoSena/models"
+	"HimenoSena/utils"
 )
 
 var (
 	// management database connect
-	dbs = make(map[string]*gorm.DB)
-	err error
+	dbs           = make(map[string]*gorm.DB)
+	err           error
+	serverUserExp models.ServerUserExp = models.ServerUserExp{}
 )
 
 func init() {
@@ -53,11 +55,12 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
+	c.Bot.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMembers | discordgo.IntentsGuildMessages | discordgo.IntentsMessageContent
 
 	c.Bot.AddHandler(ready)
 	c.Bot.AddHandler(onInteraction)
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		event.MessageHandler(s, m, &c)
+		event.MessageHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverUserExp)
 	})
 	c.Bot.AddHandler(func(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
 		event.VoiceHandler(s, v, &c)
@@ -67,6 +70,9 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
+
+	utils.SetUserData(&c, dbs[os.Getenv("DATABASE_NAME")])
+	utils.GenerateServerUserExp(&c, dbs[os.Getenv("DATABASE_NAME")], &serverUserExp)
 
 	logrus.Info("bot is now running. Press CTRL+C to exit.")
 

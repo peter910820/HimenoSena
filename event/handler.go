@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 
 	"HimenoSena/models"
 	"HimenoSena/utils"
@@ -60,20 +61,20 @@ func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *models
 	}
 }
 
-func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.Config) {
+func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.Config, db *gorm.DB, serverUserExp *models.ServerUserExp) {
 	// avoid responding to itself
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	channel, err := s.Channel(m.ChannelID)
-	if err != nil {
-		logrus.Error(err)
-		return
-	}
-	// judge DevCategoryID id
-	if channel.ParentID == c.DevCategoryID {
-		return
-	}
+	// channel, err := s.Channel(m.ChannelID)
+	// if err != nil {
+	// 	logrus.Error(err)
+	// 	return
+	// }
+	// // judge DevCategoryID id
+	// if channel.ParentID == c.DevCategoryID {
+	// 	return
+	// }
 	// judge guild id
 	if m.GuildID == c.MainGuildID {
 		// judge if message is for bot and ChannelID not command channel
@@ -97,11 +98,34 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 			if err != nil {
 				logrus.Error(err)
 			}
+			utils.GetGuildNick(s, c.MainGuildID, m.Author.ID)
 			_, err = s.ChannelMessageSend(c.BotChannelID, fmt.Sprintf("轉送***%s***的訊息:\n%s", m.Author.Username, m.Content))
 			if err != nil {
 				logrus.Error(err)
 			}
 		}
+		// handle exp feature
+		serverUserExp.Mu.Lock()
+		defer serverUserExp.Mu.Unlock()
+		val, ok := serverUserExp.UserData[m.Author.ID]
+		if ok {
+			if val-1 == 0 {
+				levelUpExp, level, err := utils.ModifyArticle(m.Author.ID, db)
+				logrus.Debug(levelUpExp)
+				if err != nil {
+					logrus.Error(err)
+					return
+				}
+				serverUserExp.UserData[m.Author.ID] = levelUpExp
+				_, err = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("**%s** 聊天等級升到 **%d** 等", m.Author.GlobalName, level))
+				if err != nil {
+					logrus.Error(err)
+				}
+				return
+			}
+			serverUserExp.UserData[m.Author.ID] = val - 1
+		}
+		logrus.Debug(serverUserExp.UserData[m.Author.ID])
 	}
 
 }
