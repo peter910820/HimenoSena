@@ -42,7 +42,6 @@ func GenerateServerUserExp(c *models.Config, db *gorm.DB, serverUserExp *models.
 	serverUserExp.UserData = make(map[string]uint)
 	users := queryUser(db)
 	for _, user := range *users {
-		// serverUserExp.UserData[user.UserID] = (user.Level * 10) + (user.Level*2 - 2) - user.Exp
 		serverUserExp.UserData[user.UserID] = user.LevelUpExp
 	}
 }
@@ -63,11 +62,11 @@ func ModifyArticle(memberID string, db *gorm.DB) (uint, uint, error) {
 	if err != nil {
 		logrus.Error(err)
 	}
-	levelUpExp := 10 + (memberData.Level+1)*2 - 2
+	levelUpExp := 5 + (memberData.Level+1)*2 - 2
 	logrus.Debugf("%+v", memberData)
 	data := models.User{
 		Level:      memberData.Level + 1,
-		Exp:        memberData.Exp + 10 + (memberData.Level)*2 - 2,
+		Exp:        memberData.Exp + 5 + (memberData.Level)*2 - 2,
 		LevelUpExp: levelUpExp,
 		UpdatedAt:  time.Now(),
 	}

@@ -31,7 +31,7 @@ type User struct {
 	UserName   string    `gorm:"not null"`
 	Level      uint      `gorm:"not null;default:1"`
 	Exp        uint      `gorm:"not null;default:0"` // 該等級的經驗值，加上LevelUpExp才是該成員的所有經驗值
-	LevelUpExp uint      `gorm:"not null;default:10"`
+	LevelUpExp uint      `gorm:"not null;default:5"`
 	JoinAt     time.Time `gorm:"not null"`
 	UpdatedAt  time.Time
 }
