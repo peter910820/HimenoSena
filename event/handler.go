@@ -110,7 +110,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 		if ok {
 			if val-1 == 0 {
 				levelUpExp, level, err := utils.ModifyArticle(m.Author.ID, db)
-				logrus.Debug(levelUpExp)
 				if err != nil {
 					logrus.Error(err)
 					return
