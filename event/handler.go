@@ -66,15 +66,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	channel, err := s.Channel(m.ChannelID)
-	if err != nil {
-		logrus.Error(err)
-		return
-	}
-	// judge DevCategoryID id
-	if channel.ParentID == c.DevCategoryID {
-		return
-	}
+	// channel, err := s.Channel(m.ChannelID)
+	// if err != nil {
+	// 	logrus.Error(err)
+	// 	return
+	// }
+	// // judge DevCategoryID id
+	// if channel.ParentID == c.DevCategoryID {
+	// 	return
+	// }
 	// judge guild id
 	if m.GuildID == c.MainGuildID {
 		// judge if message is for bot and ChannelID not command channel
@@ -123,10 +123,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 			}
 			serverUserExp.MemberData[m.Author.ID] = val - 1
 		}
-		logrus.Debug(serverUserExp.MemberData[m.Author.ID])
 	}
 }
 
-func GuildMemberAddHandler(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *models.Config, db *gorm.DB) {
+func GuildMemberAddHandler(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
+	serverUserExp.Mu.Lock()
+	defer serverUserExp.Mu.Unlock()
 	utils.CreateUser(c, m.Member, db)
+	_, ok := serverUserExp.MemberData[m.Member.User.ID]
+	if !ok {
+		serverUserExp.MemberData[m.Member.User.ID] = 5
+	}
 }

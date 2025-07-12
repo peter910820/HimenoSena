@@ -40,11 +40,23 @@ func CreateUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
 }
 
 func GenerateServerUserExp(c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
-	serverUserExp.ServerID = c.MainGuildID
-	serverUserExp.MemberData = make(map[string]uint)
-	members := queryUser(db)
-	for _, member := range *members {
-		serverUserExp.MemberData[member.UserID] = member.LevelUpExp
+	if len(serverUserExp.MemberData) != 0 {
+		members := queryUser(db)
+		for _, member := range *members {
+			_, ok := serverUserExp.MemberData[member.UserID]
+			if ok {
+				continue
+			} else {
+				serverUserExp.MemberData[member.UserID] = member.LevelUpExp
+			}
+		}
+	} else {
+		serverUserExp.ServerID = c.MainGuildID
+		serverUserExp.MemberData = make(map[string]uint)
+		members := queryUser(db)
+		for _, member := range *members {
+			serverUserExp.MemberData[member.UserID] = member.LevelUpExp
+		}
 	}
 }
 
@@ -65,7 +77,6 @@ func ModifyArticle(memberID string, db *gorm.DB) (uint, uint, error) {
 		logrus.Error(err)
 	}
 	levelUpExp := 5 + (memberData.Level+1)*2 - 2
-	logrus.Debugf("%+v", memberData)
 	data := models.Member{
 		Level:      memberData.Level + 1,
 		Exp:        memberData.Exp + 5 + (memberData.Level)*2 - 2,
@@ -95,4 +106,26 @@ func SaveMemberData(data *models.ServerMemberExp) {
 	if err := encoder.Encode(data.MemberData); err != nil {
 		logrus.Error(err)
 	}
+}
+
+func RestoreJsonData(mainGuildID string, serverMemberExp *models.ServerMemberExp) error {
+	path := mainGuildID + "_memberData.json"
+
+	if _, err := os.Stat(path); err == nil {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		var memberData models.ServerMemberExp
+		if err := json.Unmarshal(data, &memberData.MemberData); err != nil {
+			return err
+		}
+
+		serverMemberExp.ServerID = mainGuildID
+		serverMemberExp.MemberData = memberData.MemberData
+	} else {
+		return nil
+	}
+	return nil
 }

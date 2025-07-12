@@ -51,6 +51,8 @@ func main() {
 		DevCategoryID: os.Getenv("DEV_CATEGORY_ID"),
 	}
 
+	utils.RestoreJsonData(c.MainGuildID, &serverMemberExp)
+
 	c.Bot, err = discordgo.New("Bot " + c.Token)
 	if err != nil {
 		logrus.Fatal(err)
@@ -66,7 +68,7 @@ func main() {
 		event.VoiceHandler(s, v, &c)
 	})
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
-		event.GuildMemberAddHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")])
+		event.GuildMemberAddHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
 	})
 
 	err = c.Bot.Open()
