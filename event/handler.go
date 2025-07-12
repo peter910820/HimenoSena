@@ -66,15 +66,15 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	// channel, err := s.Channel(m.ChannelID)
-	// if err != nil {
-	// 	logrus.Error(err)
-	// 	return
-	// }
-	// // judge DevCategoryID id
-	// if channel.ParentID == c.DevCategoryID {
-	// 	return
-	// }
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+	// judge DevCategoryID id
+	if channel.ParentID == c.DevCategoryID {
+		return
+	}
 	// judge guild id
 	if m.GuildID == c.MainGuildID {
 		// judge if message is for bot and ChannelID not command channel
