@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"HimenoSena/models"
+	"HimenoSena/model"
 	"HimenoSena/utils"
 	"fmt"
 	"os"
@@ -42,7 +42,7 @@ func GetRoles(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 }
 
-func GetChatLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
+func GetChatLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverUserExp *model.ServerMemberExp) {
 	serverUserExp.Mu.Lock()
 	defer serverUserExp.Mu.Unlock()
 	memberData, err := utils.QueryUser(i.Member.User.ID, db)

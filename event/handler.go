@@ -7,11 +7,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"HimenoSena/models"
+	"HimenoSena/model"
 	"HimenoSena/utils"
 )
 
-func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *models.Config) {
+func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *model.Config) {
 	username, err := utils.GetUserName(s, v)
 	if err != nil {
 		logrus.Error(err)
@@ -61,7 +61,7 @@ func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *models
 	}
 }
 
-func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
+func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *model.Config, db *gorm.DB, serverUserExp *model.ServerMemberExp) {
 	// avoid responding to itself
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -126,7 +126,7 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 	}
 }
 
-func GuildMemberAddHandler(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
+func GuildMemberAddHandler(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *model.Config, db *gorm.DB, serverUserExp *model.ServerMemberExp) {
 	serverUserExp.Mu.Lock()
 	defer serverUserExp.Mu.Unlock()
 	utils.CreateUser(c, m.Member, db)

@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"HimenoSena/models"
+	"HimenoSena/model"
 	"encoding/json"
 	"os"
 	"time"
@@ -13,7 +13,7 @@ import (
 )
 
 // set user data into database
-func SetUserData(c *models.Config, db *gorm.DB) {
+func SetUserData(c *model.Config, db *gorm.DB) {
 	members, err := c.Bot.GuildMembers(c.MainGuildID, "", 1000)
 	if err != nil {
 		logrus.Fatal(err)
@@ -25,8 +25,8 @@ func SetUserData(c *models.Config, db *gorm.DB) {
 	}
 }
 
-func CreateUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
-	data := models.Member{
+func CreateUser(c *model.Config, member *discordgo.Member, db *gorm.DB) {
+	data := model.Member{
 		UserID:   member.User.ID,
 		ServerID: c.MainGuildID,
 		UserName: member.User.Username,
@@ -39,7 +39,7 @@ func CreateUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
 	}
 }
 
-func GenerateServerUserExp(c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
+func GenerateServerUserExp(c *model.Config, db *gorm.DB, serverUserExp *model.ServerMemberExp) {
 	if len(serverUserExp.MemberData) != 0 {
 		members := queryUser(db)
 		for _, member := range *members {
@@ -60,8 +60,8 @@ func GenerateServerUserExp(c *models.Config, db *gorm.DB, serverUserExp *models.
 	}
 }
 
-func queryUser(db *gorm.DB) *[]models.Member {
-	var UserData []models.Member
+func queryUser(db *gorm.DB) *[]model.Member {
+	var UserData []model.Member
 
 	result := db.Find(&UserData)
 	if result.Error != nil {
@@ -71,8 +71,8 @@ func queryUser(db *gorm.DB) *[]models.Member {
 }
 
 // query seingle member fo database use userID
-func QueryUser(userID string, db *gorm.DB) (*models.Member, error) {
-	var memberData models.Member
+func QueryUser(userID string, db *gorm.DB) (*model.Member, error) {
+	var memberData model.Member
 	err := db.Select("level, exp").Where("user_id = ?", userID).First(&memberData).Error
 	if err != nil {
 		return &memberData, err
@@ -81,20 +81,20 @@ func QueryUser(userID string, db *gorm.DB) (*models.Member, error) {
 }
 
 func ModifyArticle(userID string, db *gorm.DB) (uint, uint, error) {
-	var memberData models.Member
+	var memberData model.Member
 	err := db.Select("level, exp").Where("user_id = ?", userID).First(&memberData).Error
 	if err != nil {
 		logrus.Error(err)
 	}
 	levelUpExp := 5 + (memberData.Level+1)*2 - 2
-	data := models.Member{
+	data := model.Member{
 		Level:      memberData.Level + 1,
 		Exp:        memberData.Exp + 5 + (memberData.Level)*2 - 2,
 		LevelUpExp: levelUpExp,
 		UpdatedAt:  time.Now(),
 	}
 
-	err = db.Model(&models.Member{}).Where("user_id = ?", userID).
+	err = db.Model(&model.Member{}).Where("user_id = ?", userID).
 		Select("level", "exp", "level_up_exp", "updated_at").Updates(data).Error
 	if err != nil {
 		return 0, 0, err
@@ -102,7 +102,7 @@ func ModifyArticle(userID string, db *gorm.DB) (uint, uint, error) {
 	return levelUpExp, memberData.Level + 1, nil
 }
 
-func SaveMemberData(data *models.ServerMemberExp) {
+func SaveMemberData(data *model.ServerMemberExp) {
 	file, err := os.Create(data.ServerID + "_memberData.json")
 	if err != nil {
 		logrus.Error(err)
@@ -118,7 +118,7 @@ func SaveMemberData(data *models.ServerMemberExp) {
 	}
 }
 
-func RestoreJsonData(mainGuildID string, serverMemberExp *models.ServerMemberExp) error {
+func RestoreJsonData(mainGuildID string, serverMemberExp *model.ServerMemberExp) error {
 	path := mainGuildID + "_memberData.json"
 
 	if _, err := os.Stat(path); err == nil {
@@ -127,7 +127,7 @@ func RestoreJsonData(mainGuildID string, serverMemberExp *models.ServerMemberExp
 			return err
 		}
 
-		var memberData models.ServerMemberExp
+		var memberData model.ServerMemberExp
 		if err := json.Unmarshal(data, &memberData.MemberData); err != nil {
 			return err
 		}
