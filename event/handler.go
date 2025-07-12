@@ -98,7 +98,6 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 			if err != nil {
 				logrus.Error(err)
 			}
-			utils.GetGuildNick(s, c.MainGuildID, m.Author.ID)
 			_, err = s.ChannelMessageSend(c.BotChannelID, fmt.Sprintf("轉送***%s***的訊息:\n%s", m.Author.Username, m.Content))
 			if err != nil {
 				logrus.Error(err)
@@ -127,4 +126,8 @@ func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.
 		}
 		logrus.Debug(serverUserExp.MemberData[m.Author.ID])
 	}
+}
+
+func GuildMemberAddHandler(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *models.Config, db *gorm.DB) {
+	utils.CreateUser(c, m.Member, db)
 }

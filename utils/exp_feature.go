@@ -20,12 +20,12 @@ func SetUserData(c *models.Config, db *gorm.DB) {
 	}
 	for _, member := range members {
 		if !member.User.Bot {
-			createUser(c, member, db)
+			CreateUser(c, member, db)
 		}
 	}
 }
 
-func createUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
+func CreateUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
 	data := models.Member{
 		MemberID:   member.User.ID,
 		ServerID:   c.MainGuildID,

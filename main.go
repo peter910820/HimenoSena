@@ -65,6 +65,9 @@ func main() {
 	c.Bot.AddHandler(func(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
 		event.VoiceHandler(s, v, &c)
 	})
+	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
+		event.GuildMemberAddHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")])
+	})
 
 	err = c.Bot.Open()
 	if err != nil {
