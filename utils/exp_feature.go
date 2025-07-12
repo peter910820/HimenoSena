@@ -27,10 +27,10 @@ func SetUserData(c *models.Config, db *gorm.DB) {
 
 func CreateUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
 	data := models.Member{
-		MemberID:   member.User.ID,
-		ServerID:   c.MainGuildID,
-		MemberName: member.User.Username,
-		JoinAt:     member.JoinedAt,
+		UserID:   member.User.ID,
+		ServerID: c.MainGuildID,
+		UserName: member.User.Username,
+		JoinAt:   member.JoinedAt,
 	}
 
 	err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&data).Error
@@ -44,7 +44,7 @@ func GenerateServerUserExp(c *models.Config, db *gorm.DB, serverUserExp *models.
 	serverUserExp.MemberData = make(map[string]uint)
 	members := queryUser(db)
 	for _, member := range *members {
-		serverUserExp.MemberData[member.MemberID] = member.LevelUpExp
+		serverUserExp.MemberData[member.UserID] = member.LevelUpExp
 	}
 }
 
@@ -60,7 +60,7 @@ func queryUser(db *gorm.DB) *[]models.Member {
 
 func ModifyArticle(memberID string, db *gorm.DB) (uint, uint, error) {
 	var memberData models.Member
-	err := db.Select("level, exp").Where("member_id = ?", memberID).First(&memberData).Error
+	err := db.Select("level, exp").Where("user_id = ?", memberID).First(&memberData).Error
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -73,7 +73,7 @@ func ModifyArticle(memberID string, db *gorm.DB) (uint, uint, error) {
 		UpdatedAt:  time.Now(),
 	}
 
-	err = db.Model(&models.Member{}).Where("member_id = ?", memberID).
+	err = db.Model(&models.Member{}).Where("user_id = ?", memberID).
 		Select("level", "exp", "level_up_exp", "updated_at").Updates(data).Error
 	if err != nil {
 		return 0, 0, err
