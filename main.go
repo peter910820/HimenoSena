@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -85,7 +86,7 @@ func main() {
 	logrus.Info("bot is now running. Press CTRL+C to exit.")
 
 	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 	interruptSignal := <-ch
 	c.Bot.Close()
 	utils.SaveMemberData(&serverMemberExp)
