@@ -107,6 +107,8 @@ func onInteraction(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		go commands.Send(s, i, amount)
 	case "取得身分組":
 		go commands.GetRoles(s, i)
+	case "取得聊天等級":
+		go commands.GetChatLevel(s, i, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
 	default:
 		logrus.Warn("command not founds")
 	}
