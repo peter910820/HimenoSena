@@ -51,7 +51,10 @@ func main() {
 		DevCategoryID: os.Getenv("DEV_CATEGORY_ID"),
 	}
 
-	utils.RestoreJsonData(c.MainGuildID, &serverMemberExp)
+	err = utils.RestoreJsonData(c.MainGuildID, &serverMemberExp)
+	if err != nil {
+		logrus.Fatal(err)
+	}
 
 	c.Bot, err = discordgo.New("Bot " + c.Token)
 	if err != nil {
