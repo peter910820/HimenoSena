@@ -16,6 +16,7 @@ func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *model.
 	if err != nil {
 		logrus.Error(err)
 	}
+
 	// a member into a voice channel
 	if v.BeforeUpdate == nil {
 		channelName, err := utils.GetChannelName(s, v)
@@ -23,42 +24,60 @@ func VoiceHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *model.
 			logrus.Error(err)
 		}
 		s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***加入了***%s***頻道!", *username, *channelName))
-	} else {
-		if v.ChannelID == "" {
-			s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***退出了頻道!", *username))
-		} else {
-			if v.BeforeUpdate.ChannelID != v.ChannelID {
-				channelName, err := utils.GetChannelName(s, v)
-				if err != nil {
-					logrus.Error(err)
-				}
-				s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***跑到***%s***頻道了!", *username, *channelName))
-			} else if v.BeforeUpdate.SelfDeaf != v.SelfDeaf {
-				s.ChannelMessageSend(c.VoiceManageID, func() string {
-					if v.SelfDeaf {
-						return fmt.Sprintf("***%s***拒聽中!", *username)
-					}
-					return fmt.Sprintf("***%s***解除拒聽!", *username)
-				}())
-			} else if v.BeforeUpdate.SelfMute != v.SelfMute {
-				s.ChannelMessageSend(c.VoiceManageID, func() string {
-					if v.SelfMute {
-						return fmt.Sprintf("***%s***靜音中!", *username)
-					}
-					return fmt.Sprintf("***%s***解除靜音!", *username)
-				}())
-			} else if v.BeforeUpdate.SelfStream != v.SelfStream {
-				s.ChannelMessageSend(c.VoiceManageID, func() string {
-					if v.SelfStream {
-						return fmt.Sprintf("***%s***開始直播!", *username)
-					}
-					return fmt.Sprintf("***%s***關掉直播了QQ!", *username)
-				}())
-			} else {
-				s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***語音狀態改變!", *username))
-			}
-		}
+		return
 	}
+
+	// a member switch voice channel
+	if v.BeforeUpdate.ChannelID != v.ChannelID {
+		channelName, err := utils.GetChannelName(s, v)
+		if err != nil {
+			logrus.Error(err)
+		}
+		s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***跑到***%s***頻道了!", *username, *channelName))
+		return
+	}
+
+	//  a member leave a voice channel
+	if v.ChannelID == "" {
+		s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***退出了頻道!", *username))
+		return
+	}
+
+	// deaf event
+	if v.BeforeUpdate.SelfDeaf != v.SelfDeaf {
+		s.ChannelMessageSend(c.VoiceManageID, func() string {
+			if v.SelfDeaf {
+				return fmt.Sprintf("***%s***拒聽中!", *username)
+			}
+			return fmt.Sprintf("***%s***解除拒聽!", *username)
+		}())
+		return
+	}
+
+	// mute event
+	if v.BeforeUpdate.SelfMute != v.SelfMute {
+		s.ChannelMessageSend(c.VoiceManageID, func() string {
+			if v.SelfMute {
+				return fmt.Sprintf("***%s***靜音中!", *username)
+			}
+			return fmt.Sprintf("***%s***解除靜音!", *username)
+		}())
+		return
+	}
+
+	// steam event
+	if v.BeforeUpdate.SelfStream != v.SelfStream {
+		s.ChannelMessageSend(c.VoiceManageID, func() string {
+			if v.SelfStream {
+				return fmt.Sprintf("***%s***開始直播!", *username)
+			}
+			return fmt.Sprintf("***%s***關掉直播了QQ!", *username)
+		}())
+		return
+	}
+
+	// other event
+	s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***其他語音狀態改變!", *username))
 }
 
 func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *model.Config, db *gorm.DB, serverUserExp *model.ServerMemberExp) {
