@@ -78,6 +78,7 @@ func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *mo
 }
 
 func VoiceEventHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *model.Config) {
+	logrus.Debug("test voice event")
 	username, err := utils.GetUserName(s, v)
 	if err != nil {
 		logrus.Error(err)
