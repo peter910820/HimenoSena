@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
@@ -78,7 +79,6 @@ func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *mo
 }
 
 func VoiceEventHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *model.Config) {
-	logrus.Debug("test voice event")
 	username, err := utils.GetUserName(s, v)
 	if err != nil {
 		logrus.Error(err)
@@ -100,7 +100,11 @@ func VoiceEventHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *m
 		if err != nil {
 			logrus.Error(err)
 		}
-		s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***跑到***%s***頻道了!", *username, *channelName))
+		if strings.TrimSpace(*channelName) == "" {
+			s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***退出語音頻道!", *username))
+		} else {
+			s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***跑到***%s***頻道了!", *username, *channelName))
+		}
 		return
 	}
 
