@@ -60,10 +60,10 @@ func GetChatLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm
 
 func GetGroupAllLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, c *model.Config) {
 	var memberData model.Member
-	err := db.Select("user_name, exp, join_at").Where("server_id = ?", c.MainGuildID).Model(&memberData).Error
+	err := db.Select("user_name, exp, join_at").Where("server_id = ?", c.MainGuildID).Find(&memberData).Error
 	if err != nil {
 		logrus.Error(err)
 	}
 
-	utils.SendInteractionMsg(s, i, fmt.Sprintf("**%+v", memberData))
+	utils.SendInteractionMsg(s, i, fmt.Sprintf("%+v", memberData))
 }
