@@ -36,3 +36,7 @@ func InitDsn() (string, *gorm.DB) {
 
 	return dbname, db
 }
+
+func Migration(dbName string, db *gorm.DB) {
+	db.AutoMigrate(&Member{})
+}

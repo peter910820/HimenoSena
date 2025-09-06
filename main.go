@@ -10,10 +10,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"HimenoSena/commands"
-	"HimenoSena/event"
+	"HimenoSena/bot"
+	"HimenoSena/handlers"
 	"HimenoSena/model"
-	"HimenoSena/utils"
 )
 
 var (
@@ -53,7 +52,7 @@ func init() {
 }
 
 func main() {
-	err = utils.RestoreJsonData(c.MainGuildID, &serverMemberExp)
+	err = bot.RestoreJsonData(c.MainGuildID, &serverMemberExp)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -64,16 +63,18 @@ func main() {
 	}
 	c.Bot.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMembers | discordgo.IntentsGuildMessages | discordgo.IntentsMessageContent
 
-	c.Bot.AddHandler(ready)
-	c.Bot.AddHandler(onInteraction)
+	c.Bot.AddHandler(handlers.Ready)
+	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.InteractionCreate) {
+		handlers.OnInteractionHandler(s, m, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp, &c)
+	})
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		event.MessageHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
+		handlers.MessageEventHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
 	})
 	c.Bot.AddHandler(func(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
-		event.VoiceHandler(s, v, &c)
+		handlers.VoiceEventHandler(s, v, &c)
 	})
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
-		event.GuildMemberAddHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
+		handlers.GuildMemberAddEventHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
 	})
 
 	err = c.Bot.Open()
@@ -81,8 +82,8 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	utils.SetUserData(&c, dbs[os.Getenv("DATABASE_NAME")])
-	utils.GenerateServerUserExp(&c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
+	bot.SetUserData(&c, dbs[os.Getenv("DATABASE_NAME")])
+	bot.GenerateServerUserExp(&c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
 
 	logrus.Info("bot is now running. Press CTRL+C to exit.")
 
@@ -90,30 +91,6 @@ func main() {
 	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 	interruptSignal := <-ch
 	c.Bot.Close()
-	utils.SaveMemberData(&serverMemberExp)
+	bot.SaveMemberData(&serverMemberExp)
 	logrus.Info(interruptSignal)
-}
-
-func ready(s *discordgo.Session, m *discordgo.Ready) {
-	s.UpdateGameStatus(0, "恋×シンアイ彼女")
-	commands.BasicCommand(s)
-}
-
-func onInteraction(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	switch i.ApplicationCommandData().Name {
-	case "ping":
-		delay := s.HeartbeatLatency()
-		go commands.Ping(s, i, delay)
-	case "send":
-		amount := i.ApplicationCommandData().Options[0].StringValue()
-		go commands.Send(s, i, amount)
-	case "取得身分組":
-		go commands.GetRoles(s, i)
-	case "取得聊天等級":
-		go commands.GetChatLevel(s, i, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
-	case "取得群組等級排行":
-		go commands.GetGroupAllLevel(s, i, dbs[os.Getenv("DATABASE_NAME")], &c)
-	default:
-		logrus.Warn("command not founds")
-	}
 }

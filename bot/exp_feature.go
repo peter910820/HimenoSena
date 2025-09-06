@@ -1,7 +1,6 @@
-package utils
+package bot
 
 import (
-	"HimenoSena/model"
 	"encoding/json"
 	"os"
 	"time"
@@ -10,6 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	"HimenoSena/model"
 )
 
 // set user data into database
