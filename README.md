@@ -1,5 +1,5 @@
 # HimenoSena
-A disocrd bot is used to intercept messages from other bots to designated channels
+一個多功能的自用discord管理機器人
 
 ## 專案架構:
 ```bash
