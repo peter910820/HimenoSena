@@ -21,6 +21,7 @@ var (
 	dbs             = make(map[string]*gorm.DB)
 	err             error
 	serverMemberExp model.ServerMemberExp = model.ServerMemberExp{}
+	c               model.Config
 )
 
 func init() {
@@ -39,10 +40,8 @@ func init() {
 	dbName, db := model.InitDsn()
 	dbs[dbName] = db
 	model.Migration(dbName, dbs[dbName])
-}
 
-func main() {
-	c := model.Config{
+	c = model.Config{
 		Token:         os.Getenv("TOKEN"),
 		AppID:         os.Getenv("APP_ID"),
 		MainGuildID:   os.Getenv("MAIN_GUILD_ID"),
@@ -51,7 +50,9 @@ func main() {
 		VoiceManageID: os.Getenv("VOICE_MANAGE_ID"),
 		DevCategoryID: os.Getenv("DEV_CATEGORY_ID"),
 	}
+}
 
+func main() {
 	err = utils.RestoreJsonData(c.MainGuildID, &serverMemberExp)
 	if err != nil {
 		logrus.Fatal(err)
@@ -94,7 +95,7 @@ func main() {
 }
 
 func ready(s *discordgo.Session, m *discordgo.Ready) {
-	s.UpdateGameStatus(0, "想要傳達給你的愛戀")
+	s.UpdateGameStatus(0, "恋×シンアイ彼女")
 	commands.BasicCommand(s)
 }
 
@@ -110,6 +111,8 @@ func onInteraction(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		go commands.GetRoles(s, i)
 	case "取得聊天等級":
 		go commands.GetChatLevel(s, i, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
+	case "取得群組等級排行":
+		go commands.GetGroupAllLevel(s, i, dbs[os.Getenv("DATABASE_NAME")], &c)
 	default:
 		logrus.Warn("command not founds")
 	}

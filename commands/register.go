@@ -45,6 +45,10 @@ func BasicCommand(s *discordgo.Session) {
 			Name:        "取得聊天等級",
 			Description: "取得自己的聊天等級以及經驗值",
 		},
+		{
+			Name:        "取得群組等級排行",
+			Description: "取得當前群組等級排行",
+		},
 	}
 	for _, cmd := range commands {
 		_, err := s.ApplicationCommandCreate(s.State.User.ID, "", cmd)
