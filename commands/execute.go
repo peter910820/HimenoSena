@@ -59,11 +59,16 @@ func GetChatLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm
 }
 
 func GetGroupAllLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, c *model.Config) {
-	var memberData model.Member
-	err := db.Select("user_name, exp, join_at").Where("server_id = ?", c.MainGuildID).Find(&memberData).Error
+	var memberData []model.Member
+	err := db.Select("user_name, level, join_at").Where("server_id = ?", c.MainGuildID).Order("exp DESC").Limit(10).Find(&memberData).Error
 	if err != nil {
 		logrus.Error(err)
 	}
 
-	utils.SendInteractionMsg(s, i, fmt.Sprintf("%+v", memberData))
+	resultStr := ""
+	for i, v := range memberData {
+		resultStr += fmt.Sprintf("%d. **%s** %d等 加入時間: %s\n", i, v.UserName, v.Level, v.JoinAt.Format("2006-01-02"))
+	}
+
+	utils.SendInteractionMsg(s, i, resultStr)
 }
