@@ -61,7 +61,7 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	c.Bot.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMembers | discordgo.IntentsGuildMessages | discordgo.IntentsMessageContent
+	c.Bot.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMembers | discordgo.IntentsGuildMessages | discordgo.IntentsMessageContent | discordgo.IntentsGuildVoiceStates
 
 	c.Bot.AddHandler(handlers.Ready)
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.InteractionCreate) {
