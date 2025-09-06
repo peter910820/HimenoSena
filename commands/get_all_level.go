@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"HimenoSena/model"
+	"HimenoSena/models"
 	"HimenoSena/utils"
 	"fmt"
 
@@ -10,8 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetAllLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, c *model.Config) {
-	var memberData []model.Member
+func GetAllLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, c *models.Config) {
+	var memberData []models.Member
 	err := db.Select("user_name, level, join_at").Where("server_id = ?", c.MainGuildID).Order("exp DESC").Limit(10).Find(&memberData).Error
 	if err != nil {
 		logrus.Error(err)

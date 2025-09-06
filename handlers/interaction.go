@@ -6,10 +6,10 @@ import (
 	"gorm.io/gorm"
 
 	"HimenoSena/commands"
-	"HimenoSena/model"
+	"HimenoSena/models"
 )
 
-func OnInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverMemberExp *model.ServerMemberExp, c *model.Config) {
+func OnInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverMemberExp *models.ServerMemberExp, c *models.Config) {
 	switch i.ApplicationCommandData().Name {
 	case "ping":
 		delay := s.HeartbeatLatency()

@@ -8,11 +8,11 @@ import (
 	"gorm.io/gorm"
 
 	"HimenoSena/bot"
-	"HimenoSena/model"
+	"HimenoSena/models"
 	"HimenoSena/utils"
 )
 
-func GetLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverUserExp *model.ServerMemberExp) {
+func GetLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
 	serverUserExp.Mu.Lock()
 	defer serverUserExp.Mu.Unlock()
 	memberData, err := bot.QueryUser(i.Member.User.ID, db)

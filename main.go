@@ -12,15 +12,15 @@ import (
 
 	"HimenoSena/bot"
 	"HimenoSena/handlers"
-	"HimenoSena/model"
+	"HimenoSena/models"
 )
 
 var (
 	// management database connect
 	dbs             = make(map[string]*gorm.DB)
 	err             error
-	serverMemberExp model.ServerMemberExp = model.ServerMemberExp{}
-	c               model.Config
+	serverMemberExp models.ServerMemberExp = models.ServerMemberExp{}
+	c               models.Config
 )
 
 func init() {
@@ -36,11 +36,11 @@ func init() {
 		logrus.Fatal(err)
 	}
 	// init database
-	dbName, db := model.InitDsn()
+	dbName, db := bot.InitDsn()
 	dbs[dbName] = db
-	model.Migration(dbName, dbs[dbName])
+	bot.Migration(dbName, dbs[dbName])
 
-	c = model.Config{
+	c = models.Config{
 		Token:         os.Getenv("TOKEN"),
 		AppID:         os.Getenv("APP_ID"),
 		MainGuildID:   os.Getenv("MAIN_GUILD_ID"),

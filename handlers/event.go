@@ -9,11 +9,11 @@ import (
 	"gorm.io/gorm"
 
 	"HimenoSena/bot"
-	"HimenoSena/model"
+	"HimenoSena/models"
 	"HimenoSena/utils"
 )
 
-func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *model.Config, db *gorm.DB, serverUserExp *model.ServerMemberExp) {
+func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
 	// avoid responding to itself
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -78,7 +78,7 @@ func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *mo
 	}
 }
 
-func VoiceEventHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *model.Config) {
+func VoiceEventHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *models.Config) {
 	username, err := utils.GetUserName(s, v)
 	if err != nil {
 		logrus.Error(err)
@@ -151,7 +151,7 @@ func VoiceEventHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *m
 	s.ChannelMessageSend(c.VoiceManageID, fmt.Sprintf("***%s***其他語音狀態改變!", *username))
 }
 
-func GuildMemberAddEventHandler(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *model.Config, db *gorm.DB, serverUserExp *model.ServerMemberExp) {
+func GuildMemberAddEventHandler(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
 	serverUserExp.Mu.Lock()
 	defer serverUserExp.Mu.Unlock()
 	bot.CreateUser(c, m.Member, db)

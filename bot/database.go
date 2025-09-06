@@ -1,4 +1,4 @@
-package model
+package bot
 
 import (
 	"fmt"
@@ -8,6 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"HimenoSena/models"
 )
 
 func InitDsn() (string, *gorm.DB) {
@@ -38,5 +40,5 @@ func InitDsn() (string, *gorm.DB) {
 }
 
 func Migration(dbName string, db *gorm.DB) {
-	db.AutoMigrate(&Member{})
+	db.AutoMigrate(&models.Member{})
 }
