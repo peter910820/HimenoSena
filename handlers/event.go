@@ -18,19 +18,16 @@ func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *mo
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	// channel, err := s.Channel(m.ChannelID)
-	// if err != nil {
-	// 	logrus.Error(err)
-	// 	return
-	// }
-	// judge DevCategoryID id
-	// if channel.ParentID == c.DevCategoryID {
-	// 	return
-	// }
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
 	// judge guild id
 	if m.GuildID == c.MainGuildID {
 		// judge if message is for bot and ChannelID not command channel
-		if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) > 0 {
+		if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) > 0 && channel.ParentID != c.DevCategoryID {
 			// transferMsg := fmt.Sprintf("轉送*%s*的訊息:\n%v", m.Author.Username, m.Content)
 			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
 			if err != nil {
@@ -45,7 +42,7 @@ func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *mo
 				logrus.Error(err)
 			}
 
-		} else if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) == 0 {
+		} else if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) == 0 && channel.ParentID != c.DevCategoryID {
 			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
 			if err != nil {
 				logrus.Error(err)
@@ -67,7 +64,12 @@ func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *mo
 					return
 				}
 				serverUserExp.MemberData[m.Author.ID] = levelUpExp
-				_, err = s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("**%s** 聊天等級升到 **%d** 等", m.Author.GlobalName, level))
+				embed := &discordgo.MessageEmbed{
+					Title:       "🎉**有人升級了**",
+					Color:       0xFC9F4D,
+					Description: fmt.Sprintf("**%s** 聊天等級升到 **%d** 等", m.Author.GlobalName, level),
+				}
+				_, err = s.ChannelMessageSendEmbed(c.LevelUpChannel, embed)
 				if err != nil {
 					logrus.Error(err)
 				}
