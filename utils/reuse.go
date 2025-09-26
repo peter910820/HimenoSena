@@ -41,6 +41,15 @@ func SendInteractionMsg(s *discordgo.Session, i *discordgo.InteractionCreate, ms
 	})
 }
 
+func SendEmbedInteractionMsg(s *discordgo.Session, i *discordgo.InteractionCreate, embed *discordgo.MessageEmbed) {
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	})
+}
+
 func GetGuildNick(s *discordgo.Session, guildID string, userID string) (string, error) {
 	member, err := s.GuildMember(guildID, userID)
 	if err != nil {

@@ -41,13 +41,14 @@ func init() {
 	bot.Migration(dbName, dbs[dbName])
 
 	c = models.Config{
-		Token:         os.Getenv("TOKEN"),
-		AppID:         os.Getenv("APP_ID"),
-		MainGuildID:   os.Getenv("MAIN_GUILD_ID"),
-		BotChannelID:  os.Getenv("BOT_CHANNEL_ID"),
-		BotChannelID2: os.Getenv("BOT_CHANNEL_ID2"),
-		VoiceManageID: os.Getenv("VOICE_MANAGE_ID"),
-		DevCategoryID: os.Getenv("DEV_CATEGORY_ID"),
+		Token:          os.Getenv("TOKEN"),
+		AppID:          os.Getenv("APP_ID"),
+		MainGuildID:    os.Getenv("MAIN_GUILD_ID"),
+		BotChannelID:   os.Getenv("BOT_CHANNEL_ID"),
+		BotChannelID2:  os.Getenv("BOT_CHANNEL_ID2"),
+		LevelUpChannel: os.Getenv("LEVELUP_CHANNEL"),
+		VoiceManageID:  os.Getenv("VOICE_MANAGE_ID"),
+		DevCategoryID:  os.Getenv("DEV_CATEGORY_ID"),
 	}
 }
 

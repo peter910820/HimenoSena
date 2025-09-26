@@ -8,14 +8,15 @@ import (
 )
 
 type Config struct {
-	Bot           *discordgo.Session
-	Token         string
-	AppID         string
-	MainGuildID   string
-	BotChannelID  string
-	BotChannelID2 string
-	VoiceManageID string
-	DevCategoryID string
+	Bot            *discordgo.Session
+	Token          string
+	AppID          string
+	MainGuildID    string
+	BotChannelID   string
+	BotChannelID2  string
+	LevelUpChannel string
+	VoiceManageID  string
+	DevCategoryID  string
 }
 
 type ServerMemberExp struct {

@@ -74,7 +74,7 @@ func queryUser(db *gorm.DB) *[]models.Member {
 // query seingle member fo database use userID
 func QueryUser(userID string, db *gorm.DB) (*models.Member, error) {
 	var memberData models.Member
-	err := db.Select("level, exp").Where("user_id = ?", userID).First(&memberData).Error
+	err := db.Select("level, exp, level_up_exp, join_at").Where("user_id = ?", userID).First(&memberData).Error
 	if err != nil {
 		return &memberData, err
 	}

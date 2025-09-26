@@ -25,5 +25,28 @@ func GetLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB,
 		logrus.Error("找不到該使用者的經驗值資料")
 		return
 	}
-	utils.SendInteractionMsg(s, i, fmt.Sprintf("**%s** 目前等級為 **%d** 等，距離下一等還差 **%d** 經驗值", i.Member.User.GlobalName, memberData.Level, val))
+
+	embed := &discordgo.MessageEmbed{
+		Title: fmt.Sprintf("🔔**%s等級資訊**", memberData.UserName),
+		Color: 0xB5CAA0,
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "目前等級/總經驗值",
+				Value:  fmt.Sprintf("**%dLv**/%d", memberData.Level, memberData.Exp+memberData.LevelUpExp),
+				Inline: true,
+			},
+			{
+				Name:   "距離升級經驗",
+				Value:  fmt.Sprintf("%d", val),
+				Inline: true,
+			},
+			{
+				Name:   "加入時間",
+				Value:  memberData.JoinAt.Format("2006-01-02"),
+				Inline: true,
+			},
+		},
+	}
+
+	utils.SendEmbedInteractionMsg(s, i, embed)
 }
