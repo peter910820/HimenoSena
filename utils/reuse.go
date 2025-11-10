@@ -1,10 +1,18 @@
 package utils
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
+)
+
+var (
+	// option not found error
+	ErrOptionNotFound = errors.New("option: option not found")
+	// option translate fail error
+	ErrOptionTranslateFail = errors.New("option: value translate fail")
 )
 
 func GetUserName(s *discordgo.Session, v *discordgo.VoiceStateUpdate) (*string, error) {
@@ -63,4 +71,19 @@ func GetGuildNick(s *discordgo.Session, guildID string, userID string) (string, 
 		nick = member.User.Username
 	}
 	return nick, nil
+}
+
+// get slash command options
+func GetOptions(i *discordgo.InteractionCreate, name string) (string, error) {
+	for _, v := range i.ApplicationCommandData().Options {
+		if v.Name == name {
+			value, ok := v.Value.(string) // type assertion
+			if !ok {
+				return "", ErrOptionTranslateFail
+			} else {
+				return value, nil
+			}
+		}
+	}
+	return "", ErrOptionNotFound
 }

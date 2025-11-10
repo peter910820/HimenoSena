@@ -23,6 +23,8 @@ func OnInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate, 
 		go commands.GetLevel(s, i, db, serverMemberExp)
 	case "取得群組等級排行":
 		go commands.GetAllLevel(s, i, db, c)
+	case "查詢log":
+		go commands.GetLog(s, i)
 	default:
 		logrus.Warn("command not founds")
 	}
