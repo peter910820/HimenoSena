@@ -25,31 +25,33 @@ func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *mo
 	}
 
 	// judge guild id
-	if m.GuildID == c.MainGuildID {
-		// judge if message is for bot and ChannelID not command channel
-		if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) > 0 && channel.ParentID != c.DevCategoryID {
-			// transferMsg := fmt.Sprintf("轉送*%s*的訊息:\n%v", m.Author.Username, m.Content)
-			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
-			if err != nil {
-				logrus.Error(err)
-			}
-			_, err = s.ChannelMessageSend(c.BotChannelID, fmt.Sprintf("轉送***%s***的訊息:", m.Author.Username))
-			if err != nil {
-				logrus.Error(err)
-			}
-			_, err = s.ChannelMessageSendEmbed(c.BotChannelID, m.Embeds[0])
-			if err != nil {
-				logrus.Error(err)
-			}
+	if _, found := bot.IDMap[m.GuildID]; found {
+		if m.GuildID == c.MainGuildID[0] { // main guild
+			// judge if message is for bot and ChannelID not command channel
+			if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) > 0 && channel.ParentID != c.DevCategoryID {
+				// transferMsg := fmt.Sprintf("轉送*%s*的訊息:\n%v", m.Author.Username, m.Content)
+				err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+				if err != nil {
+					logrus.Error(err)
+				}
+				_, err = s.ChannelMessageSend(c.BotChannelID, fmt.Sprintf("轉送***%s***的訊息:", m.Author.Username))
+				if err != nil {
+					logrus.Error(err)
+				}
+				_, err = s.ChannelMessageSendEmbed(c.BotChannelID, m.Embeds[0])
+				if err != nil {
+					logrus.Error(err)
+				}
 
-		} else if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) == 0 && channel.ParentID != c.DevCategoryID {
-			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
-			if err != nil {
-				logrus.Error(err)
-			}
-			_, err = s.ChannelMessageSend(c.BotChannelID, fmt.Sprintf("轉送***%s***的訊息:\n%s", m.Author.Username, m.Content))
-			if err != nil {
-				logrus.Error(err)
+			} else if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) == 0 && channel.ParentID != c.DevCategoryID {
+				err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+				if err != nil {
+					logrus.Error(err)
+				}
+				_, err = s.ChannelMessageSend(c.BotChannelID, fmt.Sprintf("轉送***%s***的訊息:\n%s", m.Author.Username, m.Content))
+				if err != nil {
+					logrus.Error(err)
+				}
 			}
 		}
 		// handle exp feature

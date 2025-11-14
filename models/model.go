@@ -11,7 +11,7 @@ type Config struct {
 	Bot            *discordgo.Session
 	Token          string
 	AppID          string
-	MainGuildID    string
+	MainGuildID    []string
 	BotChannelID   string
 	BotChannelID2  string
 	LevelUpChannel string

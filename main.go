@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -40,10 +41,19 @@ func init() {
 	dbs[dbName] = db
 	bot.Migration(dbName, dbs[dbName])
 
+	parts := strings.Split(os.Getenv("MAIN_GUILD_ID"), ",")
+	for i := range parts {
+		parts[i] = strings.TrimSpace(parts[i])
+	}
+	bot.IDMap = make(map[string]struct{}, len(parts))
+	for _, id := range parts {
+		bot.IDMap[id] = struct{}{}
+	}
+
 	c = models.Config{
 		Token:          os.Getenv("TOKEN"),
 		AppID:          os.Getenv("APP_ID"),
-		MainGuildID:    os.Getenv("MAIN_GUILD_ID"),
+		MainGuildID:    parts, // Not used
 		BotChannelID:   os.Getenv("BOT_CHANNEL_ID"),
 		BotChannelID2:  os.Getenv("BOT_CHANNEL_ID2"),
 		LevelUpChannel: os.Getenv("LEVELUP_CHANNEL"),
@@ -53,7 +63,7 @@ func init() {
 }
 
 func main() {
-	err = bot.RestoreJsonData(c.MainGuildID, &serverMemberExp)
+	err = bot.RestoreJsonData(c.MainGuildID[0], &serverMemberExp)
 	if err != nil {
 		logrus.Fatal(err)
 	}

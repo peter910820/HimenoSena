@@ -15,7 +15,7 @@ import (
 
 // set user data into database
 func SetUserData(c *models.Config, db *gorm.DB) {
-	members, err := c.Bot.GuildMembers(c.MainGuildID, "", 1000)
+	members, err := c.Bot.GuildMembers(c.MainGuildID[0], "", 1000)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -29,7 +29,7 @@ func SetUserData(c *models.Config, db *gorm.DB) {
 func CreateUser(c *models.Config, member *discordgo.Member, db *gorm.DB) {
 	data := models.Member{
 		UserID:   member.User.ID,
-		ServerID: c.MainGuildID,
+		ServerID: c.MainGuildID[0],
 		UserName: member.User.Username,
 		JoinAt:   member.JoinedAt,
 	}
@@ -52,7 +52,7 @@ func GenerateServerUserExp(c *models.Config, db *gorm.DB, serverUserExp *models.
 			}
 		}
 	} else {
-		serverUserExp.ServerID = c.MainGuildID
+		serverUserExp.ServerID = c.MainGuildID[0]
 		serverUserExp.MemberData = make(map[string]uint)
 		members := queryUser(db)
 		for _, member := range *members {
