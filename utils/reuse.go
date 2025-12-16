@@ -87,3 +87,11 @@ func GetOptions(i *discordgo.InteractionCreate, name string) (string, error) {
 	}
 	return "", ErrOptionNotFound
 }
+
+func IsDeferredInteraction(m *discordgo.Message) bool {
+	if m.Interaction == nil {
+		return false
+	}
+
+	return len(m.Embeds) == 0
+}

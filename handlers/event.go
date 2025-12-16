@@ -13,6 +13,8 @@ import (
 	"HimenoSena/utils"
 )
 
+var updateMsgIdTmp = make(map[string]struct{})
+
 func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *models.Config, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
 	// avoid responding to itself
 	if m.Author.ID == s.State.User.ID {
@@ -42,14 +44,17 @@ func MessageEventHandler(s *discordgo.Session, m *discordgo.MessageCreate, c *mo
 				logrus.Error(err)
 			}
 
-		} else if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && len(m.Embeds) == 0 && channel.ParentID != c.DevCategoryID {
-			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
-			if err != nil {
-				logrus.Error(err)
-			}
-			_, err = s.ChannelMessageSend(c.BotChannelID, fmt.Sprintf("轉送***%s***的訊息:\n%s", m.Author.Username, m.Content))
-			if err != nil {
-				logrus.Error(err)
+		} else if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && channel.ParentID != c.DevCategoryID {
+			if !utils.IsDeferredInteraction(m.Message) {
+				_, err = s.ChannelMessageSend(c.BotChannelID, fmt.Sprintf("轉送***%s***的訊息:\n%s", m.Author.Username, m.Content))
+				if err != nil {
+					logrus.Error(err)
+				}
+
+				err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+				if err != nil {
+					logrus.Error(err)
+				}
 			}
 		}
 		// handle exp feature
@@ -160,5 +165,56 @@ func GuildMemberAddEventHandler(s *discordgo.Session, m *discordgo.GuildMemberAd
 	_, ok := serverUserExp.MemberData[m.Member.User.ID]
 	if !ok {
 		serverUserExp.MemberData[m.Member.User.ID] = 5
+	}
+}
+
+func MessageUpdateHandler(s *discordgo.Session, m *discordgo.MessageUpdate, c *models.Config) {
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+
+	if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && channel.ParentID != c.DevCategoryID {
+		if _, ok := updateMsgIdTmp[m.ID]; ok {
+			delete(updateMsgIdTmp, m.ID)
+			return
+		}
+		embeds := make([]*discordgo.MessageEmbed, 0, len(m.Embeds))
+		for _, e := range m.Embeds {
+			embeds = append(embeds, &discordgo.MessageEmbed{
+				Title:       e.Title,
+				Description: e.Description,
+				URL:         e.URL,
+				Timestamp:   e.Timestamp,
+				Color:       e.Color,
+				Footer:      e.Footer,
+				Image:       e.Image,
+				Thumbnail:   e.Thumbnail,
+				Author:      e.Author,
+				Fields:      e.Fields,
+			})
+		}
+
+		returnMsg := &discordgo.MessageSend{
+			Content: fmt.Sprintf(
+				"轉送 ***%s*** 的訊息：\n%s",
+				m.Author.Username,
+				m.Content,
+			),
+
+			Embeds: embeds,
+		}
+
+		if _, err := s.ChannelMessageSendComplex(c.BotChannelID, returnMsg); err != nil {
+			logrus.Error(err)
+		}
+
+		err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+		if err != nil {
+			logrus.Error(err)
+		}
+
+		updateMsgIdTmp[m.Message.ID] = struct{}{}
 	}
 }

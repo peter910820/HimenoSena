@@ -77,6 +77,9 @@ func main() {
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		handlers.GuildMemberAddEventHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
 	})
+	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.MessageUpdate) {
+		handlers.MessageUpdateHandler(s, m, &c)
+	})
 
 	err = c.Bot.Open()
 	if err != nil {
