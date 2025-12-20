@@ -5,12 +5,10 @@ go 1.24.0
 require (
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/joho/godotenv v1.5.1
-	github.com/peter910820/discordbot-db v0.0.0
+	github.com/peter910820/discordbot-db v0.0.0-20251220161217-2f67a30ef45c
 	github.com/sirupsen/logrus v1.9.3
 	gorm.io/gorm v1.31.1
 )
-
-replace github.com/peter910820/discordbot-db => ../discordbot-db
 
 require (
 	github.com/gorilla/websocket v1.5.3 // indirect
