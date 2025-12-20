@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -10,17 +11,19 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
+	"HimenoSena"
 	"HimenoSena/bot"
 	"HimenoSena/handlers"
-	"HimenoSena/models"
+
+	discordbotdb "github.com/peter910820/discordbot-db"
 )
 
 var (
 	// management database connect
-	dbs             = make(map[string]*gorm.DB)
+	dbs             *gorm.DB
 	err             error
-	serverMemberExp models.ServerMemberExp = models.ServerMemberExp{}
-	c               models.Config
+	serverMemberExp HimenoSena.ServerMemberExp = HimenoSena.ServerMemberExp{}
+	c               HimenoSena.Config
 )
 
 func init() {
@@ -35,12 +38,29 @@ func init() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	// init database
-	dbName, db := bot.InitDsn()
-	dbs[dbName] = db
-	bot.Migration(dbName, dbs[dbName])
 
-	c = models.Config{
+	// init database
+	portStr := os.Getenv("DATABASE_PORT")
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	db, err := discordbotdb.InitDsn(discordbotdb.ConnectDBConfig{
+		Owner:    os.Getenv("DATABASE_OWNER"),
+		Password: os.Getenv("DATABASE_PASSWORD"),
+		DBName:   os.Getenv("DATABASE_NAME"),
+		Port:     port,
+	})
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	dbs = db
+
+	// Migration
+	discordbotdb.Migration(db)
+
+	c = HimenoSena.Config{
 		Token:          os.Getenv("TOKEN"),
 		AppID:          os.Getenv("APP_ID"),
 		MainGuildID:    os.Getenv("MAIN_GUILD_ID"),
@@ -66,16 +86,16 @@ func main() {
 
 	c.Bot.AddHandler(handlers.Ready)
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.InteractionCreate) {
-		handlers.OnInteractionHandler(s, m, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp, &c)
+		handlers.OnInteractionHandler(s, m, dbs, &serverMemberExp, &c)
 	})
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		handlers.MessageEventHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
+		handlers.MessageEventHandler(s, m, &c, dbs, &serverMemberExp)
 	})
 	c.Bot.AddHandler(func(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
 		handlers.VoiceEventHandler(s, v, &c)
 	})
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
-		handlers.GuildMemberAddEventHandler(s, m, &c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
+		handlers.GuildMemberAddEventHandler(s, m, &c, dbs, &serverMemberExp)
 	})
 	c.Bot.AddHandler(func(s *discordgo.Session, m *discordgo.MessageUpdate) {
 		handlers.MessageUpdateHandler(s, m, &c)
@@ -86,8 +106,8 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	bot.SetUserData(&c, dbs[os.Getenv("DATABASE_NAME")])
-	bot.GenerateServerUserExp(&c, dbs[os.Getenv("DATABASE_NAME")], &serverMemberExp)
+	bot.SetUserData(&c, dbs)
+	bot.GenerateServerUserExp(&c, dbs, &serverMemberExp)
 
 	logrus.Info("bot is now running. Press CTRL+C to exit.")
 

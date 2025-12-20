@@ -5,11 +5,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
+	"HimenoSena"
 	"HimenoSena/commands"
-	"HimenoSena/models"
 )
 
-func OnInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverMemberExp *models.ServerMemberExp, c *models.Config) {
+func OnInteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverMemberExp *HimenoSena.ServerMemberExp, c *HimenoSena.Config) {
 	switch i.ApplicationCommandData().Name {
 	case "ping":
 		delay := s.HeartbeatLatency()

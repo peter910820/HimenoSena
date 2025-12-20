@@ -7,12 +7,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
+	"HimenoSena"
 	"HimenoSena/bot"
-	"HimenoSena/models"
 	"HimenoSena/utils"
 )
 
-func GetLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverUserExp *models.ServerMemberExp) {
+func GetLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverUserExp *HimenoSena.ServerMemberExp) {
 	serverUserExp.Mu.Lock()
 	defer serverUserExp.Mu.Unlock()
 	memberData, err := bot.QueryUser(i.Member.User.ID, db)

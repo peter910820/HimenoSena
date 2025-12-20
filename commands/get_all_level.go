@@ -1,17 +1,19 @@
 package commands
 
 import (
-	"HimenoSena/models"
+	"HimenoSena"
 	"HimenoSena/utils"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+
+	discordbotdb "github.com/peter910820/discordbot-db"
 )
 
-func GetAllLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, c *models.Config) {
-	var memberData []models.Member
+func GetAllLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, c *HimenoSena.Config) {
+	var memberData []discordbotdb.Member
 	err := db.Select("user_name, level, join_at").Where("server_id = ?", c.MainGuildID).Order("exp DESC").Limit(10).Find(&memberData).Error
 	if err != nil {
 		logrus.Error(err)
