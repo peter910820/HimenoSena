@@ -11,6 +11,8 @@ import (
 	"HimenoSena"
 	"HimenoSena/bot"
 	"HimenoSena/utils"
+
+	discordbotdb "github.com/peter910820/discordbot-db"
 )
 
 var updateMsgIdTmp = make(map[string]struct{})
@@ -161,7 +163,16 @@ func VoiceEventHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *H
 func GuildMemberAddEventHandler(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *HimenoSena.Config, db *gorm.DB, serverUserExp *HimenoSena.ServerMemberExp) {
 	serverUserExp.Mu.Lock()
 	defer serverUserExp.Mu.Unlock()
-	bot.CreateUser(c, m.Member, db)
+	err := discordbotdb.CreateMember(db, discordbotdb.Member{
+		UserID:   m.User.ID,
+		ServerID: c.MainGuildID,
+		UserName: m.User.Username,
+		JoinAt:   m.JoinedAt,
+	})
+	if err != nil {
+		logrus.Error(err)
+	}
+
 	_, ok := serverUserExp.MemberData[m.Member.User.ID]
 	if !ok {
 		serverUserExp.MemberData[m.Member.User.ID] = 5

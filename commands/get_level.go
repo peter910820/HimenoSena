@@ -8,14 +8,15 @@ import (
 	"gorm.io/gorm"
 
 	"HimenoSena"
-	"HimenoSena/bot"
 	"HimenoSena/utils"
+
+	discordbotdb "github.com/peter910820/discordbot-db"
 )
 
 func GetLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, serverUserExp *HimenoSena.ServerMemberExp) {
 	serverUserExp.Mu.Lock()
 	defer serverUserExp.Mu.Unlock()
-	memberData, err := bot.QueryUser(i.Member.User.ID, db)
+	memberData, err := discordbotdb.QueryMemberByUserID(db, i.Member.User.ID)
 	if err != nil {
 		logrus.Error(err)
 		return

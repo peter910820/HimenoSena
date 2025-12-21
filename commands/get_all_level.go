@@ -4,6 +4,7 @@ import (
 	"HimenoSena"
 	"HimenoSena/utils"
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
@@ -13,16 +14,16 @@ import (
 )
 
 func GetAllLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, c *HimenoSena.Config) {
-	var memberData []discordbotdb.Member
-	err := db.Select("user_name, level, join_at").Where("server_id = ?", c.MainGuildID).Order("exp DESC").Limit(10).Find(&memberData).Error
+	memberData, err := discordbotdb.GetServerTopMembersByExp(db, c.MainGuildID, 10)
 	if err != nil {
 		logrus.Error(err)
+		return
 	}
 
-	resultStr := ""
+	var resultStr strings.Builder
 	for i, v := range memberData {
-		resultStr += fmt.Sprintf("%d. **%s** %d等 加入時間: %s\n", i, v.UserName, v.Level, v.JoinAt.Format("2006-01-02"))
+		fmt.Fprintf(&resultStr, "%d. **%s** %d等 加入時間: %s\n", i, v.UserName, v.Level, v.JoinAt.Format("2006-01-02"))
 	}
 
-	utils.SendInteractionMsg(s, i, resultStr)
+	utils.SendInteractionMsg(s, i, resultStr.String())
 }
