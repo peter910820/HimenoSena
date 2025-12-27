@@ -84,8 +84,13 @@ func BasicCommand(s *discordgo.Session) {
 	}
 
 	guildID := os.Getenv("MAIN_GUILD_ID")
+	guildID2 := os.Getenv("LOG_GUILD_ID")
 	for _, cmd := range privateCommand {
 		_, err := s.ApplicationCommandCreate(s.State.User.ID, guildID, cmd)
+		if err != nil {
+			logrus.Error(err)
+		}
+		_, err = s.ApplicationCommandCreate(s.State.User.ID, guildID2, cmd)
 		if err != nil {
 			logrus.Error(err)
 		}

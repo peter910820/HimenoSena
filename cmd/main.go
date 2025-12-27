@@ -46,6 +46,7 @@ func init() {
 		logrus.Fatal(err)
 	}
 
+	// 初始化DB
 	db, err := discordbotdb.InitDsn(discordbotdb.ConnectDBConfig{
 		Owner:    os.Getenv("DATABASE_OWNER"),
 		Password: os.Getenv("DATABASE_PASSWORD"),
