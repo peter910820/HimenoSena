@@ -186,46 +186,49 @@ func MessageUpdateHandler(s *discordgo.Session, m *discordgo.MessageUpdate, c *H
 		return
 	}
 
-	if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && channel.ParentID != c.DevCategoryID {
-		if _, ok := updateMsgIdTmp[m.ID]; ok {
-			delete(updateMsgIdTmp, m.ID)
-			return
-		}
-		embeds := make([]*discordgo.MessageEmbed, 0, len(m.Embeds))
-		for _, e := range m.Embeds {
-			embeds = append(embeds, &discordgo.MessageEmbed{
-				Title:       e.Title,
-				Description: e.Description,
-				URL:         e.URL,
-				Timestamp:   e.Timestamp,
-				Color:       e.Color,
-				Footer:      e.Footer,
-				Image:       e.Image,
-				Thumbnail:   e.Thumbnail,
-				Author:      e.Author,
-				Fields:      e.Fields,
-			})
-		}
+	// 只轉送自己群組的訊息
+	if m.GuildID == c.MainGuildID {
+		if m.Author.Bot && (m.ChannelID != c.BotChannelID && m.ChannelID != c.BotChannelID2) && channel.ParentID != c.DevCategoryID {
+			if _, ok := updateMsgIdTmp[m.ID]; ok {
+				delete(updateMsgIdTmp, m.ID)
+				return
+			}
+			embeds := make([]*discordgo.MessageEmbed, 0, len(m.Embeds))
+			for _, e := range m.Embeds {
+				embeds = append(embeds, &discordgo.MessageEmbed{
+					Title:       e.Title,
+					Description: e.Description,
+					URL:         e.URL,
+					Timestamp:   e.Timestamp,
+					Color:       e.Color,
+					Footer:      e.Footer,
+					Image:       e.Image,
+					Thumbnail:   e.Thumbnail,
+					Author:      e.Author,
+					Fields:      e.Fields,
+				})
+			}
 
-		returnMsg := &discordgo.MessageSend{
-			Content: fmt.Sprintf(
-				"轉送 ***%s*** 的訊息：\n%s",
-				m.Author.Username,
-				m.Content,
-			),
+			returnMsg := &discordgo.MessageSend{
+				Content: fmt.Sprintf(
+					"轉送 ***%s*** 的訊息：\n%s",
+					m.Author.Username,
+					m.Content,
+				),
 
-			Embeds: embeds,
+				Embeds: embeds,
+			}
+
+			if _, err := s.ChannelMessageSendComplex(c.BotChannelID, returnMsg); err != nil {
+				logrus.Error(err)
+			}
+
+			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+			if err != nil {
+				logrus.Error(err)
+			}
+
+			updateMsgIdTmp[m.Message.ID] = struct{}{}
 		}
-
-		if _, err := s.ChannelMessageSendComplex(c.BotChannelID, returnMsg); err != nil {
-			logrus.Error(err)
-		}
-
-		err := s.ChannelMessageDelete(m.ChannelID, m.ID)
-		if err != nil {
-			logrus.Error(err)
-		}
-
-		updateMsgIdTmp[m.Message.ID] = struct{}{}
 	}
 }
