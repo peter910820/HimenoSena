@@ -10,7 +10,7 @@ import (
 
 	"HimenoSena"
 
-	discordbotdb "github.com/peter910820/discordbot-db"
+	"seaotterms-db/discordbot"
 )
 
 // set user data into database
@@ -21,7 +21,7 @@ func SetUserData(c *HimenoSena.Config, db *gorm.DB) {
 	}
 	for _, member := range members {
 		if !member.User.Bot {
-			err := discordbotdb.CreateMember(db, discordbotdb.Member{
+			err := discordbot.CreateMember(db, discordbot.Member{
 				UserID:   member.User.ID,
 				ServerID: c.MainGuildID,
 				UserName: member.User.Username,
@@ -36,7 +36,7 @@ func SetUserData(c *HimenoSena.Config, db *gorm.DB) {
 
 func GenerateServerUserExp(c *HimenoSena.Config, db *gorm.DB, serverUserExp *HimenoSena.ServerMemberExp) {
 	if len(serverUserExp.MemberData) != 0 {
-		members, err := discordbotdb.QueryMembers(db)
+		members, err := discordbot.QueryMembers(db)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -52,7 +52,7 @@ func GenerateServerUserExp(c *HimenoSena.Config, db *gorm.DB, serverUserExp *Him
 	} else {
 		serverUserExp.ServerID = c.MainGuildID
 		serverUserExp.MemberData = make(map[string]uint)
-		members, err := discordbotdb.QueryMembers(db)
+		members, err := discordbot.QueryMembers(db)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -69,20 +69,20 @@ func ModifyArticle(userID string, db *gorm.DB) (uint, uint, error) {
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 
-		member, err := discordbotdb.QueryMemberByUserID(tx, userID)
+		member, err := discordbot.QueryMemberByUserID(tx, userID)
 		if err != nil {
 			return err
 		}
 
 		levelUpExp := 5 + (member.Level+1)*2 - 2
-		data := discordbotdb.Member{
+		data := discordbot.Member{
 			Level:      member.Level + 1,
 			Exp:        member.Exp + 5 + (member.Level)*2 - 2,
 			LevelUpExp: levelUpExp,
 			UpdatedAt:  time.Now(),
 		}
 
-		if err := discordbotdb.UpdateMemberLevel(tx, userID, data); err != nil {
+		if err := discordbot.UpdateMemberLevel(tx, userID, data); err != nil {
 			return err
 		}
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"seaotterms-db/discordbot"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -11,8 +12,6 @@ import (
 	"HimenoSena"
 	"HimenoSena/bot"
 	"HimenoSena/utils"
-
-	discordbotdb "github.com/peter910820/discordbot-db"
 )
 
 var updateMsgIdTmp = make(map[string]struct{})
@@ -163,7 +162,7 @@ func VoiceEventHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate, c *H
 func GuildMemberAddEventHandler(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *HimenoSena.Config, db *gorm.DB, serverUserExp *HimenoSena.ServerMemberExp) {
 	serverUserExp.Mu.Lock()
 	defer serverUserExp.Mu.Unlock()
-	err := discordbotdb.CreateMember(db, discordbotdb.Member{
+	err := discordbot.CreateMember(db, discordbot.Member{
 		UserID:   m.User.ID,
 		ServerID: c.MainGuildID,
 		UserName: m.User.Username,

@@ -15,7 +15,7 @@ import (
 	"HimenoSena/bot"
 	"HimenoSena/handlers"
 
-	discordbotdb "github.com/peter910820/discordbot-db"
+	seaottermsdb "seaotterms-db"
 )
 
 var (
@@ -47,7 +47,7 @@ func init() {
 	}
 
 	// 初始化DB
-	db, err := discordbotdb.InitDsn(discordbotdb.ConnectDBConfig{
+	db, err := seaottermsdb.InitDsn(seaottermsdb.ConnectDBConfig{
 		Owner:    os.Getenv("DATABASE_OWNER"),
 		Password: os.Getenv("DATABASE_PASSWORD"),
 		DBName:   os.Getenv("DATABASE_NAME"),
@@ -56,10 +56,10 @@ func init() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	dbs = db
+	dbs = db.DB
 
 	// Migration
-	discordbotdb.Migration(db)
+	seaottermsdb.Migration(db)
 
 	c = HimenoSena.Config{
 		Token:          os.Getenv("TOKEN"),

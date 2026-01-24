@@ -10,11 +10,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	discordbotdb "github.com/peter910820/discordbot-db"
+	"seaotterms-db/discordbot"
 )
 
 func GetAllLevel(s *discordgo.Session, i *discordgo.InteractionCreate, db *gorm.DB, c *HimenoSena.Config) {
-	memberData, err := discordbotdb.GetServerTopMembersByExp(db, c.MainGuildID, 10)
+	memberData, err := discordbot.GetServerTopMembersByExp(db, c.MainGuildID, 10)
 	if err != nil {
 		logrus.Error(err)
 		return
