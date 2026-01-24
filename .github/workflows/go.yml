@@ -18,7 +18,7 @@ jobs:
         with:
           path: himenosena
 
-      - name: Checkout kurobidder Dependency
+      - name: Checkout seaottermsdb Dependency
         uses: actions/checkout@v5
         with:
           repository: peter910820/seaotterms-db
